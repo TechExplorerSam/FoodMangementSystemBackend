@@ -9,7 +9,7 @@ const {calculateAnalytics} = require('./Services/AnalyticsServices');
 dotenv.config();
 app.use(cors(
     {
-        origin: 'http://localhost:3000', 
+        origin: 'https://food-mangement-system-frontend.vercel.app/', 
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true 
        
