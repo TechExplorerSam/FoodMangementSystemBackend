@@ -29,6 +29,54 @@ exports.bookAnOrder = async (orderData) => {
         }
       } else {
         orderData.orderedCustomerId = exisitingCustomer._id;
+       const repeatSameOrderInPast = await orders.findOne({
+  orderedcustomerId: exisitingCustomer._id,
+  orderStatus: "Done",
+  orderTimeStamp: { $gte: moment().subtract(1, 'day').toDate() } 
+});
+
+if (repeatSameOrderInPast) {
+const pastItemIds = repeatSameOrderInPast.orderItems
+  .map(i => `${i.itemName}_${i.itemPrice}`)
+  .sort();
+
+const currentItemIds = orderData.orderItems
+  .map(i => `${i.itemName}_${i.itemPrice}`)
+  .sort();
+
+  const isSameOrder = JSON.stringify(pastItemIds) === JSON.stringify(currentItemIds);
+
+  if (isSameOrder) {
+    console.log("Same order repeated within 24 hours");
+
+    orderData.orderedTableId = repeatSameOrderInPast.orderedTableId;
+    orderData.isRepeated = true;
+    orderData.isRepeatOf = repeatSameOrderInPast._id;
+  } else {
+    console.log("Different items ordered, not a repeat");
+
+    const assignTable = await TableServices.autoAssignTableToCustomer(exisitingCustomer._id);
+    if (assignTable) {
+      orderData.orderedTableId = assignTable._id;
+    } else {
+      throw new Error('No available tables to assign');
+    }
+
+    orderData.isRepeated = false;
+    orderData.isRepeatOf = null;
+  }
+} else {
+  const assignTable = await TableServices.autoAssignTableToCustomer(exisitingCustomer._id);
+  if (assignTable) {
+    orderData.orderedTableId = assignTable._id;
+  } else {
+    throw new Error('No available tables to assign');
+  }
+
+  orderData.isRepeated = false;
+  orderData.isRepeatOf = null;
+}
+
       }
         const itemNames = orderData.orderItems.map(item => item.itemName);
         const foodItems = await FoodItem.find({ FoodItemName: { $in: itemNames } });

@@ -60,7 +60,7 @@ exports.bookAnOrder=async(orderdata)=>{
         }
         tabledata.tableStatus='Reserved';
         await tabledata.save();
-        return bookorder;
+        return  bookorder;
     }
     catch(err){
         console.log(err);
@@ -109,7 +109,11 @@ exports.getAllFoodItemsForCustomers = async () => {
 exports.placeOrder = async (orderData) => {
   console.log('Placing order with data:', orderData);
   try {
-   
+    if(orderData.orderType==="Dine-In"){
+      orderData.customerAddress = "N/A";
+
+    
+    }
     const newOrder = await orderServices.bookAnOrder({
       orderType: orderData.orderType,
       orderStatus: orderData.orderStatus,
@@ -126,15 +130,17 @@ exports.placeOrder = async (orderData) => {
         customerAddress: orderData.customerDetails.customerAddress
       }
     });
-   if(orderData.orderType==="Dine-In"){
-      orderData.customerAddress = "N/A";
-
-    
-    }
+  
     console.log('New order created:', newOrder);
     const savedOrder = await newOrder.save();
+const tableData = orderData.orderType === "Dine-In"
+  ? await table.findById(savedOrder.orderedTableId)
+  : null;
+    if (!tableData) {
+      throw new Error('Table not found');
+    }
     console.log('Order placed successfully:', savedOrder);
-    return savedOrder;
+    return {savedOrder,tableData};
   } catch (error) {
     console.error('Error placing order:', error);
     throw new Error('Unable to place order');

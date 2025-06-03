@@ -73,6 +73,10 @@ const orderSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  isRepeated:{
+    type:Boolean, 
+    default:false
+  },
   isRepeatOf: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Orders',

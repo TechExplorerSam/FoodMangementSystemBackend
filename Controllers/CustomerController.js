@@ -26,7 +26,8 @@ exports.placeOrder = async (req, res) => {
         const result = await customerService.placeOrder(orderData);
         res.status(201).json({
             message: 'Order placed successfully',
-            data: result
+            data: result,
+           
         });
     } catch (err) {
         console.error('Error placing order:', err);

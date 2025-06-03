@@ -8,7 +8,7 @@ const { updateTableNumbers } = require("../Controllers/TableController");
 
 
 
-router.get("/searchTable", searchTables);
+router.get("/searchTables", searchTables);
 router.post("/addTable", addTable);
 router.get("/getAllTables", getAllTables);
 router.put("/updateTableStatus", updateTableStatus);
