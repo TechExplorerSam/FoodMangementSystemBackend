@@ -3,13 +3,16 @@ const order=require('../Models/Orders')
 const table=require('../Models/Tables')
 const orderservices=require('../Services/OrderServices')
 const fooditem=require('../Models/FoodItems')
+const orderServices=require('../Services/OrderServices')
 exports.addACustomer=async(customerdata)=>{
     try{
+ console.log("Customer data "+customerdata.customerName);
         const existingcustomer=await customer.findOne({customerName:customerdata.customerName,customerPhone:customerdata.customerPhone});
         if(existingcustomer){
             throw new Error('Customer already exists');
         }
-        if(!customerdata.customerName || !customerdata.customerPhone || !customerdata.customerAddress){
+       
+        if(!customerdata.customerName || !customerdata.customerPhone ){
             throw new Error('Please provide all required fields');
         }
         const newcustomer= new customer({
@@ -38,7 +41,10 @@ exports.bookAnOrder=async(orderdata)=>{
             ItemsCount:orderdata.ItemsCount,
             OngoingDurationTimer:new Date.now(),
             totalAmount:orderdata.totalAmount,
-            cookingInstructions:orderdata.cookingInstructions
+            cookingInstructions:orderdata.cookingInstructions,
+            orderCustomerName:orderdata.orderCustomerName,
+            orderCustomerPhone:orderdata.orderCustomerPhone,
+            orderCustomerAddress:orderdata.orderCustomerAddress
         })
        
         const customers=await customer.findById(orderdata.customerId);
@@ -64,29 +70,24 @@ exports.bookAnOrder=async(orderdata)=>{
 
 exports.searchFoodItems = async (query) => {
   try {
-    const { name, category, minPrice, maxPrice, isAvailable } = query;
+    const { FoodItemName, FoodItemCategory, isAvailable } = query;
 
     const searchCriteria = {};
 
-    if (name) {
-      searchCriteria.itemName = { $regex: name, $options: 'i' }; 
+    if (FoodItemName) {
+      searchCriteria.FoodItemName = { $regex: FoodItemName, $options: 'i' };
     }
 
-    if (category) {
-      searchCriteria.category = category;
+    if (FoodItemCategory) {
+      searchCriteria.FoodItemCategory = FoodItemCategory;
     }
 
-    if (minPrice || maxPrice) {
-      searchCriteria.FoodItemPrice = {};
-      if (minPrice) searchCriteria.FoodItemPrice.$gte = Number(minPrice);
-      if (maxPrice) searchCriteria.FoodItemPrice.$lte = Number(maxPrice);
-    }
-
-    if (isAvailable !== undefined) {
+    if (typeof isAvailable !== 'undefined') {
       searchCriteria.isAvailable = isAvailable === 'true';
     }
 
     const foodItems = await fooditem.find(searchCriteria);
+    console.log('Food items found:', foodItems);
     return foodItems;
   } catch (error) {
     console.error('Search failed:', error);
@@ -95,3 +96,47 @@ exports.searchFoodItems = async (query) => {
 };
 
 
+exports.getAllFoodItemsForCustomers = async () => {
+  try {
+    const foodItems = await fooditem.find({ isAvailable: true });
+    return foodItems;
+  } catch (error) {
+    console.error('Error fetching food items:', error);
+    throw new Error('Unable to fetch food items');
+  }
+}
+
+exports.placeOrder = async (orderData) => {
+  console.log('Placing order with data:', orderData);
+  try {
+   
+    const newOrder = await orderServices.bookAnOrder({
+      orderType: orderData.orderType,
+      orderStatus: orderData.orderStatus,
+      orderItems: orderData.items,
+      orderTimeStamp: new Date(),
+      orderedTableId: orderData.orderedTableId,
+      ItemsCount: orderData.ItemsCount,
+      OngoingDurationTimer: new Date(),
+      totalAmount: orderData.totalAmount,
+      cookingInstructions: orderData.cookingInstructions,
+      customerDetails: {
+        customerName: orderData.customerDetails.customerName,
+        customerPhone: orderData.customerDetails.customerPhone,
+        customerAddress: orderData.customerDetails.customerAddress
+      }
+    });
+   if(orderData.orderType==="Dine-In"){
+      orderData.customerAddress = "N/A";
+
+    
+    }
+    console.log('New order created:', newOrder);
+    const savedOrder = await newOrder.save();
+    console.log('Order placed successfully:', savedOrder);
+    return savedOrder;
+  } catch (error) {
+    console.error('Error placing order:', error);
+    throw new Error('Unable to place order');
+  }
+}

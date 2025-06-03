@@ -51,4 +51,21 @@ exports.getAllOrders = async (req, res) => {
     }
 }
 
+exports.UpdateOrderStatusIfTakeAway=async(req, res) => {
+    try {
+        const orderId = req.params.id;
+        const newStatus = req.body.status;
+        const result = await orderServices.UpdateOrderStatusIfTakeAway(orderId, newStatus);
+        res.status(200).json({
+            message: 'Order status updated successfully for Take Away',
+            data: result
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: 'Error while updating order status for Take Away',
+            error: err.message
+        });
+    }
+}
 

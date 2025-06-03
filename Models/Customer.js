@@ -11,7 +11,7 @@ const customerschema=new mongoose.Schema({
     
     customerAddress:{
         type:String,
-        required:true
+       
     },
     customerOrders:{
         type:mongoose.Schema.Types.ObjectId,

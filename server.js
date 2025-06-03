@@ -9,7 +9,8 @@ const {calculateAnalytics} = require('./Services/AnalyticsServices');
 dotenv.config();
 app.use(cors(
     {
-        origin: 'https://food-mangement-system-frontend.vercel.app/', 
+        // origin: 'http://localhost:3000',
+         origin: 'https://food-mangement-system-frontend.vercel.app/', 
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true 
        
@@ -29,9 +30,12 @@ cron.schedule('0 * * * *', async () => {
 const analyticsRoutes = require('./Routes/AnalyticsRoutes');
 const tableRoutes = require('./Routes/TableRoutes');
 const OrderRoutes = require('./Routes/OrderRoutes');
+const customerRoutes = require('./Routes/CustomerRoutes');
 app.use('/admin/analytics', analyticsRoutes);
 app.use('/admin/tables', tableRoutes);
 app.use('/admin/orders', OrderRoutes);
+app.use('/custommers',customerRoutes)
+
 
 mongoose.connect(process.env.MONGO_DB_URI).then(()=>{
     console.log("Connected with mongoDB Sucessfully");

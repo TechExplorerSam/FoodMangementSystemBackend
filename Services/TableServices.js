@@ -13,7 +13,7 @@ exports.addATable=async(tabledata)=>{
         const table= new Table({
             
             tableSpecificId:tabledata.id,
-            tableName:tabledata.name,
+            tableName:tabledata.name||`Table ${tabledata.tableNumber}`,
             tableStatus:tabledata.tableStatus,
             tableNumber:tabledata.tableNumber,
             tablechaircount:tabledata.chairsCount
@@ -73,20 +73,32 @@ exports.updateTableNumbers = async (tables) => {
     const tablesArray = Object.values(tables);
 
     for (const table of tablesArray) {
-      const { _id, tableNumber } = table;
+      const { _id, tableNumber, tableName } = table;
+
       if (typeof tableNumber !== 'number' || tableNumber <= 0) {
         throw new Error(`Invalid table number for table ID ${_id}`);
       }
-      console.log(`Updating table ID ${_id} with table number ${tableNumber}`);
-      await Table.findByIdAndUpdate(_id, { tableNumber }, { new: true });
+
+      if (!tableName || typeof tableName !== 'string') {
+        throw new Error(`Invalid or missing table name for table ID ${_id}`);
+      }
+
+      console.log(`Updating table ID ${_id} with tableNumber ${tableNumber} and tableName ${tableName}`);
+
+      await Table.findByIdAndUpdate(
+        _id,
+        { tableNumber, tableName },
+        { new: true }
+      );
     }
 
     return tablesArray;
   } catch (err) {
     console.error("Error in updateTableNumbers:", err);
-    throw new Error("Error while updating table numbers");
+    throw new Error("Error while updating table numbers and names");
   }
 };
+
 
 
 

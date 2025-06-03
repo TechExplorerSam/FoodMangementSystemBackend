@@ -11,7 +11,7 @@ const foodItemSchema = new mongoose.Schema({
     },
     FoodItemCategory: {
         type: String,
-        enum: ['Appetizer', 'Main Course', 'Dessert', 'Beverage'],
+        enum: ['Burger', 'Pizza', 'Drink', 'French Fries','Veggies'],
         required: true
     },
     FoodItemDescription: {

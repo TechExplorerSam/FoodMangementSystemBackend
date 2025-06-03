@@ -85,6 +85,7 @@ exports.assignChefToOrder = async (orderItems) => {
 
     const selectedChef = chefWithTime[0].chef;
     selectedChef.chefCurrentOrder = orderItems;
+    
     selectedChef.chefCookingTime = new Date();
     selectedChef.chefCurrentOrderStatus = 'Processing';
     selectedChef.chefStatus = 'Busy';

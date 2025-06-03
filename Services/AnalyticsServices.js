@@ -38,6 +38,9 @@ exports.getAnalytics = async () => {
 orders.forEach(order => {
   console.log("Processing order:", order);
   if (orderSummary.hasOwnProperty(order.orderType)) {
+    if( order.orderStatus === "Served") {
+      orderSummary["Served"]++;
+    }
     orderSummary[order.orderType]++;
   }
 });
@@ -46,7 +49,7 @@ orders.forEach(order => {
     const chefsData = await Chefs.find({});
     const chefs = chefsData.map(chef => ({
       name: chef.chefName,
-      orders: chef.chefTakenOrders.length || 0
+      orders: chef.chefCurrentOrder.length || 0
     }));
     const tablesData = await tables.find({});
     console.log("Tables fetched:", tablesData);
@@ -82,7 +85,7 @@ exports.calculateAnalytics = async () => {
       Chefs.countDocuments(),
       tables.countDocuments()
     ]);
-
+console.log("Total Chefs:", totalChefs, "Total Tables:", totalTables);
     const totalRevenueAgg = await Orders.aggregate([
       { $group: { _id: null, totalRevenue: { $sum: "$totalAmount" } } }
     ]);
@@ -141,7 +144,7 @@ exports.calculateAnalytics = async () => {
 
     return analyticsDoc;
   } catch (err) {
-    console.error("🔥 Error in calculateAnalytics:", err);
+    console.error(" Error in calculateAnalytics:", err);
     throw new Error("Error while calculating analytics");
   }
 };
