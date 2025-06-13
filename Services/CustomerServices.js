@@ -133,12 +133,16 @@ exports.placeOrder = async (orderData) => {
   
     console.log('New order created:', newOrder);
     const savedOrder = await newOrder.save();
-const tableData = orderData.orderType === "Dine-In"
-  ? await table.findById(savedOrder.orderedTableId)
-  : null;
-    if (!tableData) {
-      throw new Error('Table not found');
-    }
+let tableData = null;
+
+if (orderData.orderType === "Dine-In") {
+  tableData = await table.findById(savedOrder.orderedTableId);
+  if (!tableData) {
+    throw new Error('Table not found for Dine-In order');
+  }
+}
+
+
     console.log('Order placed successfully:', savedOrder);
     return {savedOrder,tableData};
   } catch (error) {

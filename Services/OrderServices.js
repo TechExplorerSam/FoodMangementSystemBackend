@@ -6,6 +6,8 @@ const customer = require('../Models/Customer');
 const moment = require('moment'); 
 const TableServices= require('./TableServices');
 const chefServices = require('./ChefServices');
+const {calculateAnalytics} = require('./AnalyticsServices');
+
 exports.bookAnOrder = async (orderData) => {
     try {
       console.log("Order Data:", orderData);
@@ -125,6 +127,7 @@ const newOrderId = await getNextOrderId();
         const result = await order.save();
         await chefServices.assignChefToOrder(order.orderItems);
         console.log("Order saved successfully:", result);
+        await calculateAnalytics();
         return result;
     } catch (err) {
         console.log(err);
